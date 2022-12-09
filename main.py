@@ -37,7 +37,7 @@ def app_loop(creds):
     
 
     # request a list of all the messages
-    result = service.users().messages().list(userId='me', maxResults=2).execute()
+    result = service.users().messages().list(userId='me', maxResults=1).execute()
 
     # list of dictionaries, where each contains a message ID
     messages = result.get('messages')
@@ -72,9 +72,12 @@ def app_loop(creds):
         print("Message: ", decoded_data)
         print('\n')
 
-        Label(root, text="Subject: " + subject).pack()
-        Label(root, text="From: " + sender).pack()
-        Label(root, text="Body: " + decoded_data).pack()
+        # Label(root, text="Subject: " + subject).pack()
+        # Label(root, text="From: " + sender).pack()
+        Label(root, text=decoded_data, font=("Courier", 56)).grid(column=0,row=0)
+        
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
         # except:
         #     print("ERROR ERROR NOOOO")
 
@@ -89,6 +92,8 @@ def main():
     """Shows basic usage of the Gmail API.
     Lists the user's Gmail labels.
     """
+    root.attributes("-fullscreen", True)
+
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
