@@ -13,12 +13,30 @@ from tkinter import *
 import base64
 
 root = Tk()
+main_label = Label(root, font=("Courier", 56))
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-
 def app_loop(creds):
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+    main_label.grid(column=0,row=0)
+    main_label.bind("<Button-1>", lambda a:call_api(creds))
+
+    call_api(creds)
+        
+    # except:
+    #     print("ERROR ERROR NOOOO")
+
+    # TODO: use while True: loop here!!
+    root.mainloop()
+
+    # print('Labels:')
+    # for label in labels:
+    #     print(label['name'])
+
+def call_api(creds):
     # Call the Gmail API
     service = build('gmail', 'v1', credentials=creds)
     results = service.users().labels().list(userId='me').execute()
@@ -74,18 +92,8 @@ def app_loop(creds):
 
         # Label(root, text="Subject: " + subject).pack()
         # Label(root, text="From: " + sender).pack()
-        Label(root, text=decoded_data, font=("Courier", 56)).grid(column=0,row=0)
-        
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
-        # except:
-        #     print("ERROR ERROR NOOOO")
-
-    root.mainloop()
-
-    # print('Labels:')
-    # for label in labels:
-    #     print(label['name'])
+        # main_label = Label(root, text=decoded_data, font=("Courier", 56))
+        main_label.config(text=decoded_data)
 
 
 def main():
