@@ -21,6 +21,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 def app_loop(creds):
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
+    root.config(cursor="none")
     main_label.grid(column=0,row=0)
     main_label.bind("<Button-1>", lambda a:call_api(creds))
 
