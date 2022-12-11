@@ -14,6 +14,7 @@ import base64
 
 creds = None
 root = Tk()
+root.title("HELLO")
 max_email_history = 10
 current_email = 0
 
@@ -30,27 +31,42 @@ def tap_left():
         current_email = current_email + 1
     call_api()
 
-frame = Frame(root, relief='raised')
-# frame.pack(fill=BOTH, expand=YES)
+def handle_tap(e):
+    global current_email
+    global max_email_history
+    relative_tap = e.x / root.winfo_width()
+    if relative_tap < 0.5 and current_email < max_email_history:
+        current_email = current_email + 1
+        call_api()
+    elif relative_tap > 0.5 and current_email > 0:
+        current_email = current_email - 1
+        call_api()
+
+# frame = Frame(root, bg="pink")
+# frame.place()
 # frame.pack_propagate(False)
 
-left_button = Button(root, command=tap_left, bg="blue")
-right_button = Button(root, command=tap_right, bg="red")
-main_label = Label(frame, font=("Courier", 56))
+# left_button = Button(root, command=tap_left, bg=None, fg=None)
+# right_button = Button(root, command=tap_right, bg="red", fg="red")
+main_label = Label(root, font=("Courier", 56), bg="yellow", fg="black")
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 def app_loop():
-    frame.columnconfigure(0, weight=1)
-    frame.rowconfigure(0, weight=1)
-    root.columnconfigure(0, weight=1)
-    root.rowconfigure(0, weight=1)
-    root.config(cursor="none")
-    main_label.grid(column=0,row=0)
-    left_button.grid(column=0,row=0)
-    right_button.grid(column=1,row=0)
-    # main_label.bind("<Button-1>", lambda a:call_api())
+    # frame.columnconfigure(0, weight=1)
+    # frame.rowconfigure(0, weight=1)
+    # root.columnconfigure(0, weight=1)
+    # root.columnconfigure(1, weight=1)
+    # root.rowconfigure(0, weight=1)
+    # root.config(cursor="none")
+    # main_label.grid(column=0,row=0)
+    main_label.place(x=0,y=0,relheight=1.0,relwidth=1.0)
+    # left_button.grid(column=0,row=0, sticky="nsew")
+    # right_button.grid(column=1,row=0, sticky="nsew")
+    # left_button.tkraise()
+    # right_button.tkraise()
+    main_label.bind("<Button-1>", lambda e:handle_tap(e))
 
     call_api()
         
