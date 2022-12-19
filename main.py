@@ -1,12 +1,14 @@
 from __future__ import print_function
 
 import os.path
+from os import remove
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.auth.exceptions import RefreshError
 
 from tkinter import *
 
@@ -48,7 +50,7 @@ def handle_tap(e):
 
 # left_button = Button(root, command=tap_left, bg=None, fg=None)
 # right_button = Button(root, command=tap_right, bg="red", fg="red")
-main_label = Label(root, font=("Courier", 24), bg="yellow", fg="black")
+main_label = Label(root, font=("Courier", 24), bg="#50579C", fg="#F0F0F0")
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -161,11 +163,13 @@ def main():
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                remove('token.json')
+        flow = InstalledAppFlow.from_client_secrets_file(
+            'credentials.json', SCOPES)
+        creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
