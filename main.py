@@ -50,7 +50,7 @@ def handle_tap(e):
 
 # left_button = Button(root, command=tap_left, bg=None, fg=None)
 # right_button = Button(root, command=tap_right, bg="red", fg="red")
-main_label = Label(root, font=("Courier", 24), bg="#50579C", fg="#F0F0F0")
+main_label = Label(root, font=("Courier", 24), bg="#37566C", fg="#F0F0F0")
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
