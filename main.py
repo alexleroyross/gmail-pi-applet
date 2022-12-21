@@ -20,7 +20,7 @@ max_email_history = 10  # number of recent emails to grab
 current_email = 0       # index for current email
 
 # main label node that displays the current email text
-main_label = Label(root, font=("Nueva Std Cond", 12),
+main_label = Label(root, font=("Nueva Std Cond", 16),
                    bg="#37566C", fg="#F0F0F0")
 
 
