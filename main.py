@@ -148,6 +148,7 @@ def call_api():
     # Label(root, text="From: " + sender).pack()
     # main_label = Label(root, text=decoded_data, font=("Courier", 56))
     main_label.config(text=decoded_data)
+    root.after(600000, call_api)
 
 
 def main():
