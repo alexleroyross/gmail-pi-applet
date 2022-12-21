@@ -50,7 +50,7 @@ def handle_tap(e):
 
 # left_button = Button(root, command=tap_left, bg=None, fg=None)
 # right_button = Button(root, command=tap_right, bg="red", fg="red")
-main_label = Label(root, font=("Courier", 24), bg="#37566C", fg="#F0F0F0")
+main_label = Label(root, font=("Nueva Std Cond", 12), bg="#37566C", fg="#F0F0F0")
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -87,7 +87,6 @@ def call_api():
     global current_email
     global max_email_history
 
-    print("CALLING APIIIIIII")
     # Call the Gmail API
     service = build('gmail', 'v1', credentials=creds)
     results = service.users().labels().list(userId='me').execute()
@@ -133,14 +132,17 @@ def call_api():
     # Get the data and decode it with base 64 decoder.
     parts = payload.get('parts')[0]
     data = parts['body']['data']
+    # If the email had no text in the body
+    if not data:
+        return
     data = data.replace("-","+").replace("_","/")
     decoded_data = str(base64.b64decode(data), 'utf-8')
 
     # Printing the subject, sender's email and message
-    print("Subject: ", subject)
-    print("From: ", sender)
-    print("Message: ", decoded_data)
-    print('\n')
+    # print("Subject: ", subject)
+    # print("From: ", sender)
+    # print("Message: ", decoded_data)
+    # print('\n')
 
     # Label(root, text="Subject: " + subject).pack()
     # Label(root, text="From: " + sender).pack()
