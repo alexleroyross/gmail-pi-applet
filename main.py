@@ -14,76 +14,53 @@ from tkinter import *
 
 import base64
 
-creds = None
-root = Tk()
-root.title("HELLO")
-max_email_history = 10
-current_email = 0
+creds = None            # populated for making API calls
+root = Tk()             # root node for our tkinter app
+max_email_history = 10  # number of recent emails to grab
+current_email = 0       # index for current email
 
-def tap_right():
-    global current_email
-    if current_email > 0:
-        current_email = current_email - 1
-    call_api()
+# main label node that displays the current email text
+main_label = Label(root, font=("Nueva Std Cond", 12),
+                   bg="#37566C", fg="#F0F0F0")
 
-def tap_left():
-    global current_email
-    global max_email_history
-    if current_email < max_email_history:
-        current_email = current_email + 1
-    call_api()
+
+def init():
+    """
+    Initialize values for the app
+    """
+
+    root.title("HELLO JOLEEN")
+    root.attributes("-fullscreen", True)
+    root.bind("<FocusIn>", lambda e: update_app())
+    root.config(cursor="none")
+    main_label.place(x=0, y=0, relheight=1.0, relwidth=1.0)
+    main_label.bind("<Button-1>", lambda e: handle_tap(e))
+
 
 def handle_tap(e):
+    """
+    Increment/decrement which email to display based on if the user tapped left or right
+    """
     global current_email
     global max_email_history
+
+    # The tap location relative to the % screen width
     relative_tap = e.x / root.winfo_width()
+
+    # increment which email to display if the tap is in the left 50% of the screen
     if relative_tap < 0.5 and current_email < max_email_history:
         current_email = current_email + 1
-        call_api()
+        update_app()
+    # decrement email if tap is in the right 50% of the screen
     elif relative_tap > 0.5 and current_email > 0:
         current_email = current_email - 1
-        call_api()
+        update_app()
 
-# frame = Frame(root, bg="pink")
-# frame.place()
-# frame.pack_propagate(False)
 
-# left_button = Button(root, command=tap_left, bg=None, fg=None)
-# right_button = Button(root, command=tap_right, bg="red", fg="red")
-main_label = Label(root, font=("Nueva Std Cond", 12), bg="#37566C", fg="#F0F0F0")
-
-# If modifying these scopes, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-
-def app_loop():
-    root.bind("<FocusIn>", lambda e:call_api())
-    # frame.columnconfigure(0, weight=1)
-    # frame.rowconfigure(0, weight=1)
-    # root.columnconfigure(0, weight=1)
-    # root.columnconfigure(1, weight=1)
-    # root.rowconfigure(0, weight=1)
-    # root.config(cursor="none")
-    # main_label.grid(column=0,row=0)
-    main_label.place(x=0,y=0,relheight=1.0,relwidth=1.0)
-    # left_button.grid(column=0,row=0, sticky="nsew")
-    # right_button.grid(column=1,row=0, sticky="nsew")
-    # left_button.tkraise()
-    # right_button.tkraise()
-    main_label.bind("<Button-1>", lambda e:handle_tap(e))
-
-    call_api()
-        
-    # except:
-    #     print("ERROR ERROR NOOOO")
-
-    # TODO: use while True: loop here!!
-    root.mainloop()
-
-    # print('Labels:')
-    # for label in labels:
-    #     print(label['name'])
-
-def call_api():
+def update_app():
+    """
+    Call the gmail API and update the main Label with the body of the specified email
+    """
     global current_email
     global max_email_history
 
@@ -95,67 +72,51 @@ def call_api():
     if not labels:
         print('No labels found.')
         return
-    
-    # labels_gfx = []
 
-    # for label in labels:
-    #     label_gfx = Label(root, text=label['name'])
-    #     label_gfx.pack()
-    #     labels_gfx.append(label_gfx)
-    
-
-    # request a list of all the messages
-    result = service.users().messages().list(userId='me', maxResults=max_email_history).execute()
+    # request a list of the specified number of messages
+    result = service.users().messages().list(
+        userId='me', maxResults=max_email_history).execute()
 
     # list of dictionaries, where each contains a message ID
     messages = result.get('messages')
-  
-    # iterate through all the message dictionaries
-    # for msg in messages:
+
+    # the current message
     msg = messages[current_email]
-    # print("BAG")
+
     # get the message from its id
     text = service.users().messages().get(userId='me', id=msg['id']).execute()
-
-    # try:
     payload = text['payload']
     headers = payload['headers']
 
-    # Look for subject and sender email in the headers
-    for d in headers:
-        if d['name'] == 'Subject':
-            subject = d['value']
-        if d['name'] == 'From':
-            sender = d['value']
-
-    # The body of the message is encrypted, so we must decode it.
-    # Get the data and decode it with base 64 decoder.
+    # Grab the email data (which we decode later)
     parts = payload.get('parts')[0]
     data = parts['body']['data']
-    # If the email had no text in the body
+
+    # If the email had no text in the body, don't try to extract the data
     if not data:
         return
-    data = data.replace("-","+").replace("_","/")
+
+    # Since the body of the message is encrypted, decode the data with a base 64 decoder
+    data = data.replace("-", "+").replace("_", "/")
     decoded_data = str(base64.b64decode(data), 'utf-8')
 
-    # Printing the subject, sender's email and message
-    # print("Subject: ", subject)
-    # print("From: ", sender)
-    # print("Message: ", decoded_data)
-    # print('\n')
-
-    # Label(root, text="Subject: " + subject).pack()
-    # Label(root, text="From: " + sender).pack()
-    # main_label = Label(root, text=decoded_data, font=("Courier", 56))
+    # Configure the text in the main Label with the decoded email body
     main_label.config(text=decoded_data)
-    root.after(600000, call_api)
+
+    # Tell the app to refresh the emails after 10 minutes
+    root.after(600000, update_app)
 
 
 def main():
     """Shows basic usage of the Gmail API.
     Lists the user's Gmail labels.
     """
-    root.attributes("-fullscreen", True)
+
+    # Initialize certain aspects of the GUI
+    init()
+
+    # Delete the file token.json if you change these scopes
+    SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -177,13 +138,9 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    try:
-        app_loop()
-
-
-    except HttpError as error:
-        # TODO(developer) - Handle errors from gmail API.
-        print(f'An error occurred: {error}')
+    # Update the GUI and run the main app loop
+    update_app()
+    root.mainloop()
 
 
 if __name__ == '__main__':
