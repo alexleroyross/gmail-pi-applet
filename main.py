@@ -64,11 +64,15 @@ def update_app():
     global current_email
     global max_email_history
 
+    # Tell the app to refresh the emails after 5 minutes
+    root.after(300000, update_app)
+
     # Call the Gmail API
     service = build('gmail', 'v1', credentials=creds)
     results = service.users().labels().list(userId='me').execute()
     labels = results.get('labels', [])
 
+    # Can't proceed if there are no labels
     if not labels:
         print('No labels found.')
         return
@@ -79,6 +83,11 @@ def update_app():
 
     # list of dictionaries, where each contains a message ID
     messages = result.get('messages')
+
+    # If there were no emails, don't bother proceeding
+    if not messages or len(messages) == 0:
+        print('No messages found.')
+        return
 
     # the current message
     msg = messages[current_email]
@@ -94,6 +103,7 @@ def update_app():
 
     # If the email had no text in the body, don't try to extract the data
     if not data:
+        print('No body text found for email ' + current_email)
         return
 
     # Since the body of the message is encrypted, decode the data with a base 64 decoder
@@ -102,9 +112,6 @@ def update_app():
 
     # Configure the text in the main Label with the decoded email body
     main_label.config(text=decoded_data)
-
-    # Tell the app to refresh the emails after 10 minutes
-    root.after(600000, update_app)
 
 
 def main():
