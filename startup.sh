@@ -9,4 +9,5 @@
 # Description:       Start gmail pi app on boot
 ### END INIT INFO
 
-python3 /home/pi/gmail-pi-applet/main.py
+cd /home/pi/Desktop/gmail-pi-applet
+python3 main.py
