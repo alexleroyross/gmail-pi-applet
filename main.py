@@ -64,8 +64,8 @@ def update_app():
     global current_email
     global max_email_history
 
-    # Tell the app to refresh the emails after 5 minutes
-    root.after(300000, update_app)
+    # Tell the app to refresh the emails after 250 minutes
+    root.after(15000000, update_app)
 
     # Call the Gmail API
     service = build('gmail', 'v1', credentials=creds)
