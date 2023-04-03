@@ -24,6 +24,14 @@ main_label = Label(root, font=("Nueva Std Cond", 16),
                    bg="#37566C", fg="#F0F0F0")
 
 
+def reset_current_email():
+    global current_email
+    current_email = 0
+
+    # Tell the app to move to the latest email after 250 minutes
+    root.after(15000000, reset_current_email)
+
+
 def init():
     """
     Initialize values for the app
@@ -31,10 +39,14 @@ def init():
 
     root.title("HELLO JOLEEN")
     root.attributes("-fullscreen", True)
-    root.bind("<FocusIn>", lambda e: update_app())
+    # Seems to be some kind of bug with tkinter, this doesn't work currently
+    # root.bind("<FocusIn>", lambda: update_app(False))
     root.config(cursor="none")
     main_label.place(x=0, y=0, relheight=1.0, relwidth=1.0)
     main_label.bind("<Button-1>", lambda e: handle_tap(e))
+
+    # Tell the app to move to the latest email after 250 minutes
+    root.after(15000000, reset_current_email)
 
 
 def handle_tap(e):
@@ -50,22 +62,24 @@ def handle_tap(e):
     # increment which email to display if the tap is in the left 50% of the screen
     if relative_tap < 0.5 and current_email < max_email_history:
         current_email = current_email + 1
-        update_app()
+        update_app(False)
     # decrement email if tap is in the right 50% of the screen
     elif relative_tap > 0.5 and current_email > 0:
         current_email = current_email - 1
-        update_app()
+        update_app(False)
 
 
-def update_app():
+def update_app(schedule_recursion):
     """
-    Call the gmail API and update the main Label with the body of the specified email
+    Call the gmail API and update the main Label with the body of the specified email.
+    If schedule_recursion is True, schedule this function to be called again in 5 minutes.
     """
     global current_email
     global max_email_history
 
-    # Tell the app to refresh the emails after 250 minutes
-    root.after(15000000, update_app)
+    if schedule_recursion:
+        # Tell the app to refresh the emails after 5 minutes
+        root.after(300000, lambda: update_app(True))
 
     # Call the Gmail API
     service = build('gmail', 'v1', credentials=creds)
@@ -146,7 +160,7 @@ def main():
             token.write(creds.to_json())
 
     # Update the GUI and run the main app loop
-    update_app()
+    update_app(True)
     root.mainloop()
 
 
